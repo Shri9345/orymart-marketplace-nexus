@@ -1,12 +1,12 @@
 
 import React, { useState } from 'react';
-import { Package, DollarSign, ShoppingCart, TrendingUp, Plus, Edit, Trash2, Eye } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { ProductForm } from '@/components/ProductForm';
+import { DashboardStats } from '@/components/seller/DashboardStats';
+import { ProductsTable } from '@/components/seller/ProductsTable';
 import { ProductFormData } from '@/schemas/sellerSchemas';
 import { useToast } from '@/hooks/use-toast';
 import {
@@ -16,14 +16,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
 
 interface Product extends ProductFormData {
   id: number;
@@ -94,11 +86,6 @@ const SellerDashboard = () => {
     }
   };
 
-  const totalRevenue = products.reduce((sum, product) => sum + (product.price * product.sold), 0);
-  const totalProducts = products.length;
-  const totalOrders = products.reduce((sum, product) => sum + product.sold, 0);
-  const lowStockProducts = products.filter(product => product.stock < 15).length;
-
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
@@ -111,53 +98,7 @@ const SellerDashboard = () => {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-              <DollarSign className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">${totalRevenue.toFixed(2)}</div>
-              <p className="text-xs text-muted-foreground">+12% from last month</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Products</CardTitle>
-              <Package className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{totalProducts}</div>
-              <p className="text-xs text-muted-foreground">{lowStockProducts} low stock</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Orders</CardTitle>
-              <ShoppingCart className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{totalOrders}</div>
-              <p className="text-xs text-muted-foreground">+8% from last month</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Avg. Order Value</CardTitle>
-              <TrendingUp className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                ${totalOrders > 0 ? (totalRevenue / totalOrders).toFixed(2) : '0.00'}
-              </div>
-              <p className="text-xs text-muted-foreground">+5% from last month</p>
-            </CardContent>
-          </Card>
-        </div>
+        <DashboardStats products={products} />
 
         {/* Products Section */}
         <div className="bg-white rounded-lg shadow-sm border">
@@ -186,67 +127,7 @@ const SellerDashboard = () => {
           </div>
 
           <div className="p-6">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Product</TableHead>
-                  <TableHead>Category</TableHead>
-                  <TableHead>Price</TableHead>
-                  <TableHead>Stock</TableHead>
-                  <TableHead>Sold</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {products.map((product) => (
-                  <TableRow key={product.id}>
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        <img
-                          src={product.image}
-                          alt={product.name}
-                          className="w-12 h-12 object-cover rounded-lg"
-                        />
-                        <div>
-                          <p className="font-medium">{product.name}</p>
-                          <p className="text-sm text-gray-500">ID: {product.id}</p>
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="outline">{product.category}</Badge>
-                    </TableCell>
-                    <TableCell>${product.price.toFixed(2)}</TableCell>
-                    <TableCell>
-                      <span className={`${product.stock < 15 ? 'text-red-600' : 'text-gray-900'}`}>
-                        {product.stock}
-                        {product.stock < 15 && <span className="text-xs text-red-500 ml-1">(Low)</span>}
-                      </span>
-                    </TableCell>
-                    <TableCell>{product.sold}</TableCell>
-                    <TableCell>
-                      <Badge variant={product.status === 'Active' ? 'default' : 'secondary'}>
-                        {product.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Button variant="ghost" size="sm">
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="sm">
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="sm" className="text-red-600 hover:text-red-700">
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+            <ProductsTable products={products} />
           </div>
         </div>
       </div>
